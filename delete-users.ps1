@@ -1,6 +1,10 @@
 
 param([string]$orgurl , [string]$apikey, [string]$filepath)
 
+# Checks for presence of API key based on length. Might need to be adjusted if Okta ever changes the length of the keys. 
+if ($apikey.Length -lt 40) {
+    $apikey = (Read-Host 'Enter API Key')
+}
 
 $baseUri = $orgurl + "/api/v1/users/"
 $authorizationHeader = "SSWS " + $apikey
