@@ -2,7 +2,7 @@
 param(
     [string]$orgurl = 'weather', # Okta tenant. Defaults to 'weather' for weather.okta.com
     [string]$apikey, 
-    [string]$filepath, 
+    [string]$filepath, # Input .csv file. Must have a 'login' header with Okta username
     [Parameter(ValuefromPipeline=$false,Mandatory=$false)][switch]$preview     # Switches to oktapreview.com
 )
 
@@ -182,6 +182,10 @@ function ReadCsv()
 
 }
 
+if ($filepath.length -le 2) {
+    Write-Error "-filepath not specified. Exiting..."
+    exit
+}
 
 ReadCsv
 
