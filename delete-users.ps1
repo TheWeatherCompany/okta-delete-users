@@ -1,16 +1,31 @@
 
-param([string]$orgurl , [string]$apikey, [string]$filepath)
+param(
+    [string]$orgurl = 'weather', # Okta tenant. Defaults to 'weather' for weather.okta.com
+    [string]$apikey, 
+    [string]$filepath, 
+    [Parameter(ValuefromPipeline=$false,Mandatory=$false)][switch]$preview     # Switches to oktapreview.com
+)
+
+# if -preview is used, switch to oktapreview
+if ($preview.IsPresent) {
+$domain = 'oktapreview.com'
+}else {
+$domain = 'okta.com'
+}
+
+# $orgurl is passed in via -orgurl. Defaults to 'weather'.
+$oktaURL = 'https://' + $orgurl + '.' + $domain
 
 # Checks for presence of API key based on length. Might need to be adjusted if Okta ever changes the length of the keys. 
 if ($apikey.Length -lt 40) {
     $apikey = (Read-Host 'Enter API Key')
 }
 
-$baseUri = $orgurl + "/api/v1/users/"
+$baseUri = $oktaURL + "/api/v1/users/"
 $authorizationHeader = "SSWS " + $apikey
 
-
-New-Item "Logs" -type directory
+# Creates log directory if it doesn't exist
+if (Test-Path "./Logs" -eq $false) {[void](New-Item "Logs" -type directory)}
 
 
 function ExportToCsv($file, $login, $message)
