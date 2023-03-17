@@ -1,7 +1,7 @@
 
 param(
     [string]$orgurl = 'weather', # Okta tenant. Defaults to 'weather' for weather.okta.com
-    [string]$apikey, 
+    [string]$key, 
     [string]$filepath, # Input .csv file. Must have a 'login' header with Okta username
     [Parameter(ValuefromPipeline=$false,Mandatory=$false)][switch]$preview     # Switches to oktapreview.com
 )
@@ -17,15 +17,15 @@ $domain = 'okta.com'
 $oktaURL = 'https://' + $orgurl + '.' + $domain
 
 # Checks for presence of API key based on length. Might need to be adjusted if Okta ever changes the length of the keys. 
-if ($apikey.Length -lt 40) {
-    $apikey = (Read-Host 'Enter API Key')
+if ($key.Length -lt 40) {
+    $key = (Read-Host 'Enter API Key')
 }
 
 $baseUri = $oktaURL + "/api/v1/users/"
-$authorizationHeader = "SSWS " + $apikey
+$authorizationHeader = "SSWS " + $key
 
 # Creates log directory if it doesn't exist
-if (Test-Path "./Logs" -eq $false) {[void](New-Item "Logs" -type directory)}
+if ((Test-Path "./Logs") -eq $false) {[void](New-Item "Logs" -type directory)}
 
 
 function ExportToCsv($file, $login, $message)
