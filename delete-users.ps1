@@ -17,8 +17,12 @@ $domain = 'okta.com'
 $oktaURL = 'https://' + $orgurl + '.' + $domain
 
 # Checks for presence of API key based on length. Might need to be adjusted if Okta ever changes the length of the keys. 
-if ($key.Length -lt 40) {
+# Includes support for 1Password CLI. Make sure it's in your $env:PATH if you use it! 
+if (($key.Contains("op://")) -eq $false -and $key.Length -lt 40) {
     $key = (Read-Host 'Enter API Key')
+}elseif ($key.Contains("op://")) {
+    $key.Trim('"')
+    $key = op read $key
 }
 
 $baseUri = $oktaURL + "/api/v1/users/"
@@ -65,7 +69,7 @@ function WebRequest($uri, $reqType)
     }
     catch
     {
-        Write-Host $_.Exception.Message 
+        Write-Error $_.Exception.Message 
 
         Write-Host "`n"
 
@@ -101,7 +105,7 @@ function GetUsers($login)
         if ($status -eq "DEPROVISIONED")
         {
 
-            Write-Host "User is Deprovisioned Already `n"
+            Write-Verbose "User is Deprovisioned Already `n"
             ExportToCsv "deprov-users.csv" $username "User Was Deprovisioned"
            
             $delUserUri = $baseUri + $id 
@@ -115,7 +119,7 @@ function GetUsers($login)
             }
             else
             {
-              Write-Host "Deletign User Failed `n"
+              Write-Error "Deleting User Failed `n"
                 ExportToCsv "deprov-users-deletion-failed.csv" $username "Deleting Deprovisioned Failed"  
             }
 
@@ -144,14 +148,14 @@ function GetUsers($login)
                 }
                 else
                 {
-                    Write-Host "Deleting User Failed `n"
+                    Write-Error "Deleting User Failed `n"
                     ExportToCsv "active-users-deprovisioned-deletion-failed.csv" $username "Deleting Deprovisioned (from Active) Failed"  
                 }
 
             }
             else
             {
-                Write-Host "Deactivating User Failed `n"
+                Write-Error "Deactivating User Failed `n"
                 ExportToCsv "active-users-deprovisioning-failed.csv" $username "Deactivating User Failed"
             }
 
@@ -160,7 +164,7 @@ function GetUsers($login)
     else
     {
         ExportToCsv "not-found-users.csv" $login "User Not Found in Org"
-        Write-Host "Error Occured While Executing Request `n"
+        Write-Error "Error Occured While Executing Request `n"
     }
  
 }
@@ -174,7 +178,7 @@ function ReadCsv()
 
         $login = $_.login
 
-        Write-Host $login + " Will be deleted `n"
+        Write-Host "$login will be deleted `n"
 
         GetUsers $login
 
