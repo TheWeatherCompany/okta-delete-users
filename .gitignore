@@ -1,3 +1,4 @@
 .vscode
 Logs
 *.csv
+.DS_Store
