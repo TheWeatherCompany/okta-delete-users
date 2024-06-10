@@ -20,9 +20,9 @@ $oktaURL = 'https://' + $orgurl + '.' + $domain
 # Includes support for 1Password CLI. Make sure it's in your $env:PATH if you use it! 
 if (($key.Contains("op://")) -eq $false -and $key.Length -lt 40) {
     $key = (Read-Host 'Enter API Key')
-}elseif ($key.Contains("op://")) {
-    $key.Trim('"')
-    $key = op read $key
+}
+if ($key.Contains("op://")) {
+    $key = op read $key.Trim('"')
 }
 
 $baseUri = $oktaURL + "/api/v1/users/"
